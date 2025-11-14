@@ -1,31 +1,64 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Animated,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 export default function LoginScreen() {
-  const router = useRouter();
+  const navigation = useNavigation();
   const [aba, setAba] = useState("login");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  const handleEntrar = () => {
-    console.log("Login:", { email, senha });
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
-     router.push("/MeusGruposScreen");
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const handleEntrar = () => {
+    if (!email || !senha) {
+      Alert.alert("Atenção", "Preencha o e-mail e a senha.");
+      return;
+    }
+
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      navigation.replace("Grupos"); // ← AGORA FUNCIONA
+    });
   };
 
-
   const handleRegistro = () => {
-    console.log("Registro:", { nome, email, senha });
+    if (!nome || !email || !senha) {
+      Alert.alert("Atenção", "Preencha todos os campos.");
+      return;
+    }
+
+    Alert.alert("Conta criada!", "Faça login para continuar.");
+    setAba("login");
   };
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+
       <View style={styles.logoContainer}>
         <View style={styles.logo}></View>
         <Text style={styles.titulo}>Meu Mural</Text>
-        <Text style={styles.subtitulo}>Organize tarefas colaborativas em grupos</Text>
+        <Text style={styles.subtitulo}>Organize suas tarefas em grupo</Text>
       </View>
 
       <View style={styles.switchContainer}>
@@ -54,7 +87,6 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             placeholder="Seu nome"
-            placeholderTextColor="#B0B0B0"
             value={nome}
             onChangeText={setNome}
           />
@@ -65,7 +97,6 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="seu@email.com"
-        placeholderTextColor="#B0B0B0"
         value={email}
         onChangeText={setEmail}
       />
@@ -74,7 +105,6 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="senha ******"
-        placeholderTextColor="#B0B0B0"
         secureTextEntry
         value={senha}
         onChangeText={setSenha}
@@ -88,85 +118,42 @@ export default function LoginScreen() {
           {aba === "login" ? "Entrar" : "Criar Conta"}
         </Text>
       </TouchableOpacity>
-    </View>
+
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  logo: {
-    width: 60,
-    height: 60,
-    backgroundColor: "#0A0A23",
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  titulo: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#0A0A23",
-  },
-  subtitulo: {
-    fontSize: 13,
-    color: "#777",
-    marginTop: 4,
-  },
+  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
+  logoContainer: { alignItems: "center", marginBottom: 40 },
+  logo: { width: 60, height: 60, backgroundColor: "#000", borderRadius: 10 },
+  titulo: { fontSize: 22, fontWeight: "bold" },
+  subtitulo: { fontSize: 13, color: "#777", marginTop: 4 },
   switchContainer: {
     flexDirection: "row",
+    backgroundColor: "#eee",
+    borderRadius: 20,
     marginBottom: 20,
-    backgroundColor: "#f4f4f4",
-    borderRadius: 25,
   },
-  switchButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-  },
-  activeButton: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ccc",
-  },
-  activeText: {
-    color: "#000",
-    fontWeight: "600",
-  },
-  inactiveText: {
-    color: "#7a7a7a",
-  },
-  label: {
-    alignSelf: "flex-start",
-    marginLeft: 40,
-    fontSize: 14,
-    marginBottom: 5,
-  },
+  switchButton: { paddingVertical: 8, paddingHorizontal: 30 },
+  activeButton: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#ccc", borderRadius: 20 },
+  activeText: { color: "#000", fontWeight: "bold" },
+  inactiveText: { color: "#777" },
+  label: { alignSelf: "flex-start", marginLeft: 40 },
   input: {
     width: "80%",
     backgroundColor: "#f4f4f4",
-    borderRadius: 8,
     padding: 12,
-    marginBottom: 15,
-    color: "#000",
+    borderRadius: 8,
+    marginBottom: 10,
   },
   botao: {
-    backgroundColor: "#0A0A23",
     width: "80%",
+    backgroundColor: "#000",
     padding: 14,
     borderRadius: 8,
     alignItems: "center",
     marginTop: 10,
   },
-  textoBotao: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  textoBotao: { color: "#fff", fontWeight: "bold" },
 });
