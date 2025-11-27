@@ -7,15 +7,20 @@ import {
   StyleSheet,
   Alert,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "../context/AuthContext";
 
 export default function LoginScreen() {
   const navigation = useNavigation();
+  const { signIn, signUp } = useAuth();
+  
   const [aba, setAba] = useState("login");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const fadeAnim = useState(new Animated.Value(0))[0];
 
@@ -27,29 +32,59 @@ export default function LoginScreen() {
     }).start();
   }, []);
 
-  const handleEntrar = () => {
+  const handleEntrar = async () => {
     if (!email || !senha) {
       Alert.alert("Atenção", "Preencha o e-mail e a senha.");
       return;
     }
 
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      navigation.replace("Grupos"); // ← AGORA FUNCIONA
-    });
+    setLoading(true);
+    
+    try {
+      const result = await signIn(email, senha);
+      
+      if (result.success) {
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => {
+          navigation.replace("Grupos");
+        });
+      } else {
+        Alert.alert("Erro", result.error || "Não foi possível fazer login.");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Ocorreu um erro ao tentar fazer login.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegistro = () => {
+  const handleRegistro = async () => {
     if (!nome || !email || !senha) {
       Alert.alert("Atenção", "Preencha todos os campos.");
       return;
     }
 
-    Alert.alert("Conta criada!", "Faça login para continuar.");
-    setAba("login");
+    setLoading(true);
+    
+    try {
+      const result = await signUp(nome, email, senha);
+      
+      if (result.success) {
+        Alert.alert("Sucesso!", "Conta criada com sucesso! Faça login para continuar.");
+        setAba("login");
+        setNome("");
+        setSenha("");
+      } else {
+        Alert.alert("Erro", result.error || "Não foi possível criar a conta.");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Ocorreu um erro ao tentar criar a conta.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,6 +100,7 @@ export default function LoginScreen() {
         <TouchableOpacity
           style={[styles.switchButton, aba === "login" && styles.activeButton]}
           onPress={() => setAba("login")}
+          disabled={loading}
         >
           <Text style={aba === "login" ? styles.activeText : styles.inactiveText}>
             Login
@@ -74,6 +110,7 @@ export default function LoginScreen() {
         <TouchableOpacity
           style={[styles.switchButton, aba === "registro" && styles.activeButton]}
           onPress={() => setAba("registro")}
+          disabled={loading}
         >
           <Text style={aba === "registro" ? styles.activeText : styles.inactiveText}>
             Registro
@@ -89,6 +126,7 @@ export default function LoginScreen() {
             placeholder="Seu nome"
             value={nome}
             onChangeText={setNome}
+            editable={!loading}
           />
         </>
       )}
@@ -99,6 +137,9 @@ export default function LoginScreen() {
         placeholder="seu@email.com"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        editable={!loading}
       />
 
       <Text style={styles.label}>Senha</Text>
@@ -108,15 +149,21 @@ export default function LoginScreen() {
         secureTextEntry
         value={senha}
         onChangeText={setSenha}
+        editable={!loading}
       />
 
       <TouchableOpacity
-        style={styles.botao}
+        style={[styles.botao, loading && styles.botaoDisabled]}
         onPress={aba === "login" ? handleEntrar : handleRegistro}
+        disabled={loading}
       >
-        <Text style={styles.textoBotao}>
-          {aba === "login" ? "Entrar" : "Criar Conta"}
-        </Text>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.textoBotao}>
+            {aba === "login" ? "Entrar" : "Criar Conta"}
+          </Text>
+        )}
       </TouchableOpacity>
 
     </Animated.View>
@@ -124,10 +171,16 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
+  container: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center", 
+    backgroundColor: "#fff",
+    padding: 20,
+  },
   logoContainer: { alignItems: "center", marginBottom: 40 },
   logo: { width: 60, height: 60, backgroundColor: "#000", borderRadius: 10 },
-  titulo: { fontSize: 22, fontWeight: "bold" },
+  titulo: { fontSize: 22, fontWeight: "bold", marginTop: 10 },
   subtitulo: { fontSize: 13, color: "#777", marginTop: 4 },
   switchContainer: {
     flexDirection: "row",
@@ -136,10 +189,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   switchButton: { paddingVertical: 8, paddingHorizontal: 30 },
-  activeButton: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#ccc", borderRadius: 20 },
+  activeButton: { 
+    backgroundColor: "#fff", 
+    borderWidth: 1, 
+    borderColor: "#ccc", 
+    borderRadius: 20 
+  },
   activeText: { color: "#000", fontWeight: "bold" },
   inactiveText: { color: "#777" },
-  label: { alignSelf: "flex-start", marginLeft: 40 },
+  label: { 
+    alignSelf: "flex-start", 
+    marginLeft: 40,
+    marginBottom: 5,
+    fontWeight: "500",
+  },
   input: {
     width: "80%",
     backgroundColor: "#f4f4f4",
@@ -154,6 +217,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginTop: 10,
+  },
+  botaoDisabled: {
+    opacity: 0.6,
   },
   textoBotao: { color: "#fff", fontWeight: "bold" },
 });
