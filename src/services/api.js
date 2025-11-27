@@ -2,8 +2,8 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Configure a URL base da API
-// IMPORTANTE: Altere para o IP/domínio do seu servidor backend
-const API_BASE_URL = 'http://localhost:8416/api';
+// Backend hospedado no Senac
+const API_BASE_URL = 'http://academico3.rj.senac.br/meumural/api';
 
 // Cria instância do axios
 const api = axios.create({
