@@ -1,17 +1,18 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
+  Platform,
+  RefreshControl,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  Alert,
-  ActivityIndicator,
-  RefreshControl,
 } from "react-native";
-import postagemService from "../services/postagemService";
 import { useAuth } from "../context/AuthContext";
+import postagemService from "../services/postagemService";
 
 export default function TarefasGrupoScreen() {
   const navigation = useNavigation();
@@ -61,26 +62,71 @@ export default function TarefasGrupoScreen() {
       return;
     }
 
+    // Debug rápido no web: confirmar que o handler foi chamado e quais dados
+    if (Platform.OS === 'web') {
+      try {
+        window.alert('Criando tarefa: ' + novaTarefa + '\nDescrição: ' + novoConteudo + '\nGrupoId: ' + grupoId);
+      } catch (e) {
+        console.log('Não foi possível exibir window.alert:', e);
+      }
+    }
+
+    let timeoutId;
     try {
-      const novaPostagem = await postagemService.criarPostagem({
+      setCriando(true);
+      console.log('Criando postagem com:', { usuarioId: user.id, grupoId, titulo: novaTarefa, conteudo: novoConteudo });
+
+      // watchdog para evitar loader infinito
+      timeoutId = setTimeout(() => {
+        console.warn('adicionarTarefa: requisição demorando mais de 15s, resetando estado criando');
+        setCriando(false);
+      }, 15000);
+
+      const promise = postagemService.criarPostagem({
         usuarioId: user.id,
         grupoId: grupoId,
         titulo: novaTarefa,
         conteudo: novoConteudo,
       });
 
+      console.log('adicionarTarefa: aguardando resposta do serviço...');
+      const novaPostagem = await promise;
+      console.log('Resposta do servidor ao criar postagem:', novaPostagem);
+
       setPostagens([...postagens, novaPostagem]);
       setNovaTarefa("");
       setNovoConteudo("");
-      setCriando(false);
       Alert.alert("Sucesso", "Tarefa criada com sucesso!");
     } catch (error) {
       console.error('Erro ao criar tarefa:', error);
-      Alert.alert("Erro", "Não foi possível criar a tarefa.");
+      const message = error.response?.data?.message || error.message || 'Não foi possível criar a tarefa.';
+      Alert.alert('Erro ao criar tarefa', message);
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+      setCriando(false);
+      console.log('adicionarTarefa: setCriando(false) chamado no finally');
     }
   }
 
   async function deletarTarefa(id) {
+    if (Platform.OS === 'web') {
+      const ok = window.confirm('Deseja realmente excluir esta tarefa?');
+      if (!ok) return;
+      try {
+        console.log('Tentando deletar postagem id=', id);
+        await postagemService.deletarPostagem(id);
+        const newPostagens = postagens.filter((p) => String(p.id) !== String(id));
+        console.log('Postagens antes:', postagens);
+        console.log('Postagens depois:', newPostagens);
+        setPostagens(newPostagens);
+        window.alert('Tarefa excluída.');
+      } catch (error) {
+        console.error('Erro ao deletar tarefa:', error);
+        window.alert('Não foi possível excluir a tarefa.');
+      }
+      return;
+    }
+
     Alert.alert(
       "Confirmar",
       "Deseja realmente excluir esta tarefa?",
@@ -91,8 +137,12 @@ export default function TarefasGrupoScreen() {
           style: "destructive",
           onPress: async () => {
             try {
+              console.log('Tentando deletar postagem id=', id);
               await postagemService.deletarPostagem(id);
-              setPostagens(postagens.filter((p) => p.id !== id));
+              const newPostagens = postagens.filter((p) => String(p.id) !== String(id));
+              console.log('Postagens antes:', postagens);
+              console.log('Postagens depois:', newPostagens);
+              setPostagens(newPostagens);
               Alert.alert("Sucesso", "Tarefa excluída.");
             } catch (error) {
               console.error('Erro ao deletar tarefa:', error);
@@ -176,15 +226,20 @@ export default function TarefasGrupoScreen() {
           <View style={{ flexDirection: "row", gap: 8 }}>
             <TouchableOpacity
               onPress={adicionarTarefa}
+              disabled={criando}
               style={{
                 flex: 1,
-                backgroundColor: "#007bff",
+                backgroundColor: criando ? "#5a9bf5" : "#007bff",
                 padding: 10,
                 borderRadius: 8,
                 alignItems: "center",
               }}
             >
-              <Text style={{ color: "#fff", fontWeight: "bold" }}>Adicionar</Text>
+              {criando ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={{ color: "#fff", fontWeight: "bold" }}>Adicionar</Text>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity

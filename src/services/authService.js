@@ -46,10 +46,7 @@ const authService = {
     }
   },
 
-  /**
-   * Realiza o logout do usuário
-   * Remove token e dados do storage
-   */
+  
   async logout() {
     try {
       await AsyncStorage.removeItem('@meumural:token');

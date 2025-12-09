@@ -7,6 +7,7 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect } from "react";
@@ -20,6 +21,7 @@ export default function GruposScreen() {
 
   const [grupos, setGrupos] = useState([]);
   const [criando, setCriando] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [novoGrupo, setNovoGrupo] = useState("");
   const [descricaoGrupo, setDescricaoGrupo] = useState("");
   const [loading, setLoading] = useState(true);
@@ -77,23 +79,58 @@ export default function GruposScreen() {
     }
 
     try {
+      setCreating(true);
+      console.log('Criando grupo com:', { nome: novoGrupo, descricao: descricaoGrupo });
       const novoGrupoData = await grupoService.criarGrupo({
         nome: novoGrupo,
         descricao: descricaoGrupo,
       });
 
-      setGrupos([...grupos, { ...novoGrupoData, quantidadePostagens: 0, postagens: [] }]);
-      setNovoGrupo("");
-      setDescricaoGrupo("");
-      setCriando(false);
-      Alert.alert("Sucesso", "Grupo criado com sucesso!");
+      console.log('Resposta do servidor ao criar grupo:', novoGrupoData);
+
+      // Se servidor retornou o novo grupo com id, adiciona à lista
+      if (novoGrupoData && (novoGrupoData.id || novoGrupoData.id === 0)) {
+        setGrupos([...grupos, { ...novoGrupoData, quantidadePostagens: 0, postagens: [] }]);
+        setNovoGrupo("");
+        setDescricaoGrupo("");
+        setCriando(false);
+        Alert.alert("Sucesso", "Grupo criado com sucesso!");
+      } else {
+        // Resposta inesperada: mostrar ao usuário para diagnóstico
+        setNovoGrupo("");
+        setDescricaoGrupo("");
+        setCriando(false);
+        Alert.alert('Aviso', 'Grupo criado, mas resposta inesperada do servidor: ' + JSON.stringify(novoGrupoData));
+      }
     } catch (error) {
       console.error('Erro ao criar grupo:', error);
-      Alert.alert("Erro", "Não foi possível criar o grupo.");
+      const message = error.response?.data?.message || error.message || 'Não foi possível criar o grupo.';
+      Alert.alert('Erro ao criar grupo', message);
+    } finally {
+      setCreating(false);
     }
   }
 
   async function sairDoGrupo(id) {
+    // Alert.alert com callbacks não funciona bem no web; usar window.confirm no web
+    if (Platform.OS === 'web') {
+      const ok = window.confirm('Deseja realmente sair deste grupo?');
+      if (!ok) return;
+      try {
+        console.log('Tentando deletar grupo id=', id);
+        await grupoService.deletarGrupo(id);
+        const newGrupos = grupos.filter((g) => String(g.id) !== String(id));
+        console.log('Grupos antes:', grupos);
+        console.log('Grupos depois:', newGrupos);
+        setGrupos(newGrupos);
+        window.alert('Você saiu do grupo.');
+      } catch (error) {
+        console.error('Erro ao sair do grupo:', error);
+        window.alert('Não foi possível sair do grupo.');
+      }
+      return;
+    }
+
     Alert.alert(
       "Confirmar",
       "Deseja realmente sair deste grupo?",
@@ -104,8 +141,13 @@ export default function GruposScreen() {
           style: "destructive",
           onPress: async () => {
             try {
+              console.log('Tentando deletar grupo id=', id);
               await grupoService.deletarGrupo(id);
-              setGrupos(grupos.filter((g) => g.id !== id));
+              // Normaliza tipos antes de filtrar
+              const newGrupos = grupos.filter((g) => String(g.id) !== String(id));
+              console.log('Grupos antes:', grupos);
+              console.log('Grupos depois:', newGrupos);
+              setGrupos(newGrupos);
               Alert.alert("Sucesso", "Você saiu do grupo.");
             } catch (error) {
               console.error('Erro ao sair do grupo:', error);
@@ -231,15 +273,20 @@ export default function GruposScreen() {
           <View style={{ flexDirection: "row", gap: 8 }}>
             <TouchableOpacity
               onPress={criarGrupo}
+              disabled={creating}
               style={{
                 flex: 1,
-                backgroundColor: "#007bff",
+                backgroundColor: creating ? "#5a9bf5" : "#007bff",
                 padding: 10,
                 borderRadius: 8,
                 alignItems: "center",
               }}
             >
-              <Text style={{ color: "#fff", fontWeight: "bold" }}>Criar</Text>
+              {creating ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={{ color: "#fff", fontWeight: "bold" }}>Criar</Text>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -283,13 +330,14 @@ export default function GruposScreen() {
             }}
           >
             <TouchableOpacity
-              onPress={() =>
+              onPress={() => {
+                console.log('Navegando para TarefasGrupo com id=', g.id);
                 navigation.navigate("TarefasGrupo", {
                   grupoId: g.id,
                   grupoNome: g.nome,
                   grupoDescricao: g.descricao,
-                })
-              }
+                });
+              }}
             >
               <Text style={{ fontWeight: "bold", fontSize: 16 }}>{g.nome}</Text>
               {g.descricao && (

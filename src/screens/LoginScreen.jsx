@@ -71,13 +71,7 @@ export default function LoginScreen() {
     
     try {
 
-      const request = {
-        nome: nome,
-        email: email,
-        senha:senha,
-        status: 1
-      }
-      const result = await signUp(request);
+  const result = await signUp(nome, email, senha);
       
       if (result.success) {
         Alert.alert("Sucesso!", "Conta criada com sucesso! Faça login para continuar.");
