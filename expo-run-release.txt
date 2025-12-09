@@ -1,0 +1,52 @@
+› Port 8081 is being used by another process
+Input is required, but 'npx expo' is in non-interactive mode.
+Required input:
+> Use port 8082 instead?
+› Skipping dev server
+› Building app...
+React Compiler enabled
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓░░░░░ 73.7% (540/629)
+Android Bundled 3874ms node_modules\expo-router\entry.js (963 modules)
+Writing bundle output to: C:\Users\361293~1.1M\AppData\Local\Temp\ng26bt83hbo\index.js
+Copying 26 asset files
+Done writing bundle output
+Configuration on demand is an incubating feature.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Could not determine the dependencies of task ':gradle-plugin:settings-plugin:compileKotlin'.
+> Cannot find a Java installation on your machine (Windows 11 10.0 amd64) matching: {languageVersion=17, vendor=any vendor, implementation=vendor-specific, nativeImageCapable=false}. Some toolchain resolvers had internal failures: foojay (Requesting vendor list failed: <html>
+  <head><title>502 Bad Gateway</title></head>
+  <body>
+  <center><h1>502 Bad Gateway</h1></center>
+  <hr><center>nginx</center>
+  </body>
+  </html>
+  ).
+
+* Try:
+> Learn more about toolchain auto-detection and auto-provisioning at https://docs.gradle.org/8.14.3/userguide/toolchains.html#sec:auto_detection.
+> Learn more about toolchain repositories at https://docs.gradle.org/8.14.3/userguide/toolchains.html#sub:download_repositories.
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 22s
+Error: C:\Users\36129382024.1M\Desktop\MeuMuralApp\android\gradlew.bat app:assembleRelease -x lint -x test --configure-on-demand --build-cache -PreactNativeDevServerPort=8081 exited with non-zero code: 1
+Error: C:\Users\36129382024.1M\Desktop\MeuMuralApp\android\gradlew.bat app:assembleRelease -x lint -x test --configure-on-demand --build-cache -PreactNativeDevServerPort=8081 exited with non-zero code: 1
+    at ChildProcess.completionListener (C:\Users\36129382024.1M\Desktop\MeuMuralApp\node_modules\@expo\spawn-async\src\spawnAsync.ts:67:13)
+    at Object.onceWrapper (node:events:633:26)
+    at ChildProcess.emit (node:events:518:28)
+    at ChildProcess.cp.emit (C:\Users\36129382024.1M\Desktop\MeuMuralApp\node_modules\cross-spawn\lib\enoent.js:34:29)
+    at maybeClose (node:internal/child_process:1101:16)
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:304:5)
+    ...
+    at spawnAsync (C:\Users\36129382024.1M\Desktop\MeuMuralApp\node_modules\@expo\spawn-async\src\spawnAsync.ts:28:21)
+    at spawnGradleAsync (C:\Users\36129382024.1M\Desktop\MeuMuralApp\node_modules\expo\node_modules\@expo\cli\src\start\platforms\android\gradle.ts:134:28)
+    at assembleAsync (C:\Users\36129382024.1M\Desktop\MeuMuralApp\node_modules\expo\node_modules\@expo\cli\src\start\platforms\android\gradle.ts:83:16)
+    at runAndroidAsync (C:\Users\36129382024.1M\Desktop\MeuMuralApp\node_modules\expo\node_modules\@expo\cli\src\run\android\runAndroidAsync.ts:62:24)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)

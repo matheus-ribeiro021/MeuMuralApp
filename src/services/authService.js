@@ -1,22 +1,17 @@
 import api from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-/**
- * Serviço de autenticação
- * Gerencia login, registro e logout de usuários
- */
 
 const authService = {
   /**
-   * Realiza o login do usuário
-   * @param {string} email - Email do usuário
-   * @param {string} senha - Senha do usuário
-   * @returns {Promise} Dados do usuário e token
+   
+   * @param {string} email 
+   * @param {string} senha 
+   * @returns {Promise} 
    */
   async login(email, senha) {
     try {
-      // NOTA: O endpoint de login está comentado no backend
-      // Quando for implementado, usar: POST /api/usuario/login
+      
       const response = await api.post('/usuario/login', {
         email,
         senha,
@@ -42,13 +37,7 @@ const authService = {
    */
   async registrar(dados) {
     try {
-      const response = await api.post('/usuario/criar', {
-        nome: dados.nome,
-        email: dados.email,
-        senha: dados.senha,
-        status: 1, // Ativo por padrão
-        role: 'USER', // Role padrão
-      });
+      const response = await api.post('/api/usuario/criar', dados);
 
       return response.data;
     } catch (error) {

@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
-  Animated,
-  ActivityIndicator,
+  View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 
 export default function LoginScreen() {
@@ -70,7 +70,14 @@ export default function LoginScreen() {
     setLoading(true);
     
     try {
-      const result = await signUp(nome, email, senha);
+
+      const request = {
+        nome: nome,
+        email: email,
+        senha:senha,
+        status: 1
+      }
+      const result = await signUp(request);
       
       if (result.success) {
         Alert.alert("Sucesso!", "Conta criada com sucesso! Faça login para continuar.");
