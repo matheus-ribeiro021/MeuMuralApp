@@ -4,7 +4,7 @@
     "slug": "MeuMuralApp",
     "version": "1.0.0",
     "orientation": "portrait",
-  "icon": "./assets/images/user-icon.png",
+    "icon": "./assets/images/user-icon.png",
     "scheme": "meumuralapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -40,11 +40,18 @@
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-build-properties"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "63fe9075-8cb7-43af-91d1-c11f1a8572bf"
+      }
     }
   }
 }

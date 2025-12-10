@@ -98,3 +98,6 @@ export function useAuth() {
   }
   return context;
 }
+
+npx eas login
+# digite seu email e senha Expo
