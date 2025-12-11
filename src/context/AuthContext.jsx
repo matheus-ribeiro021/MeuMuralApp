@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import authService from '../services/authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import authService from '../services/authService';
 
 const AuthContext = createContext({});
 
@@ -16,7 +16,9 @@ export function AuthProvider({ children }) {
   async function loadStorageData() {
     try {
       const storedUser = await authService.getUsuarioLogado();
-      if (storedUser) {
+      const token = await AsyncStorage.getItem('@meumural:token');
+      // Se token for um placeholder local-token usado em modo offline, não auto-logar
+      if (storedUser && token && token !== 'local-token') {
         setUser(storedUser);
       }
     } catch (error) {
@@ -99,5 +101,3 @@ export function useAuth() {
   return context;
 }
 
-npx eas login
-# digite seu email e senha Expo

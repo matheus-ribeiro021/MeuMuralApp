@@ -1,19 +1,19 @@
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  ScrollView, 
-  TextInput,
-  Alert,
-  ActivityIndicator,
-  RefreshControl,
-  Platform,
-} from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useAuth } from "../context/AuthContext";
 import grupoService from "../services/grupoService";
 import postagemService from "../services/postagemService";
-import { useAuth } from "../context/AuthContext";
 
 export default function GruposScreen() {
   const navigation = useNavigation();

@@ -1,8 +1,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { AuthProvider, useAuth } from "../src/context/AuthContext.jsx";
 import GruposScreen from "../src/screens/GruposScreen.jsx";
 import LoginScreen from "../src/screens/LoginScreen.jsx";
 import TarefasGrupoScreen from "../src/screens/TarefasGruposScreen.jsx";
-import { AuthProvider, useAuth } from "../src/context/AuthContext.jsx";
 
 const Stack = createNativeStackNavigator();
 

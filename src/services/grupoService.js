@@ -1,5 +1,5 @@
-import api from './api';
 import { Platform } from 'react-native';
+import api from './api';
 
 /**
  * Serviço de gerenciamento de grupos
