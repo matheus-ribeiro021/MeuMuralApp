@@ -1,15 +1,15 @@
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Platform,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import grupoService from "../services/grupoService";
@@ -24,6 +24,8 @@ export default function GruposScreen() {
   const [creating, setCreating] = useState(false);
   const [novoGrupo, setNovoGrupo] = useState("");
   const [descricaoGrupo, setDescricaoGrupo] = useState("");
+  const [codigoBusca, setCodigoBusca] = useState("");
+  const [resultadosBusca, setResultadosBusca] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -108,6 +110,24 @@ export default function GruposScreen() {
       Alert.alert('Erro ao criar grupo', message);
     } finally {
       setCreating(false);
+    }
+  }
+
+  async function buscarPorCodigo() {
+    if (!codigoBusca.trim()) {
+      Alert.alert('Atenção', 'Digite o código do grupo para buscar');
+      return;
+    }
+    try {
+      const groups = await grupoService.listarGrupos();
+      const encontrados = groups.filter((g) => String(g.codigo) === String(codigoBusca.trim()));
+      setResultadosBusca(encontrados);
+      if (encontrados.length === 0) {
+        Alert.alert('Nenhum grupo', 'Nenhum grupo encontrado com o código ' + codigoBusca);
+      }
+    } catch (e) {
+      console.error('Erro ao buscar por codigo', e);
+      Alert.alert('Erro', 'Não foi possível buscar por código');
     }
   }
 
@@ -235,6 +255,39 @@ export default function GruposScreen() {
             <Text style={{ color: "#fff" }}>Sair</Text>
           </TouchableOpacity>
         </View>
+      </View>
+
+      <View style={{ marginBottom: 12 }}>
+        <TextInput
+          placeholder="Buscar por código (ex: 1234)"
+          value={codigoBusca}
+          onChangeText={setCodigoBusca}
+          style={{
+            backgroundColor: '#fff',
+            padding: 8,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: '#ddd',
+            marginBottom: 8,
+          }}
+        />
+        <TouchableOpacity onPress={buscarPorCodigo} style={{ backgroundColor: '#007bff', padding: 10, borderRadius: 8, alignItems: 'center' }}>
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Buscar por código</Text>
+        </TouchableOpacity>
+        {resultadosBusca.length > 0 && (
+          <View style={{ marginTop: 8 }}>
+            <Text style={{ fontWeight: 'bold' }}>Resultados:</Text>
+            {resultadosBusca.map((g) => (
+              <View key={g.id} style={{ padding: 8, borderWidth: 1, borderColor: '#eee', borderRadius: 6, marginTop: 6 }}>
+                <Text style={{ fontWeight: 'bold' }}>{g.nome} #{g.codigo}</Text>
+                <Text style={{ color: '#555' }}>{g.descricao}</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('TarefasGrupo', { grupoId: g.id, grupoNome: g.nome, grupoDescricao: g.descricao })} style={{ marginTop: 6 }}>
+                  <Text style={{ color: '#007bff' }}>Abrir grupo</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
 
       {criando && (
