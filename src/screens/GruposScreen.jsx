@@ -1,5 +1,5 @@
-import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -29,9 +29,11 @@ export default function GruposScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    carregarGrupos();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      carregarGrupos();
+    }, [])
+  );
 
   async function carregarGrupos() {
     try {
@@ -179,7 +181,15 @@ export default function GruposScreen() {
     );
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    if (Platform.OS === 'web') {
+      const ok = window.confirm('Deseja realmente sair da sua conta?');
+      if (!ok) return;
+      await signOut();
+      navigation.replace("Login");
+      return;
+    }
+
     Alert.alert(
       "Sair",
       "Deseja realmente sair da sua conta?",

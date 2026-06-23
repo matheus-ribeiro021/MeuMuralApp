@@ -23,6 +23,7 @@ export default function TarefasGrupoScreen() {
 
   const [postagens, setPostagens] = useState([]);
   const [criando, setCriando] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [novaTarefa, setNovaTarefa] = useState("");
   const [novoConteudo, setNovoConteudo] = useState("");
   const [loading, setLoading] = useState(true);
@@ -62,49 +63,35 @@ export default function TarefasGrupoScreen() {
       return;
     }
 
-    // Debug rápido no web: confirmar que o handler foi chamado e quais dados
-    if (Platform.OS === 'web') {
-      try {
-        window.alert('Criando tarefa: ' + novaTarefa + '\nDescrição: ' + novoConteudo + '\nGrupoId: ' + grupoId);
-      } catch (e) {
-        console.log('Não foi possível exibir window.alert:', e);
-      }
-    }
-
-    let timeoutId;
     try {
-      setCriando(true);
-      console.log('Criando postagem com:', { usuarioId: user.id, grupoId, titulo: novaTarefa, conteudo: novoConteudo });
-
-      // watchdog para evitar loader infinito
-      timeoutId = setTimeout(() => {
-        console.warn('adicionarTarefa: requisição demorando mais de 15s, resetando estado criando');
-        setCriando(false);
-      }, 15000);
-
-      const promise = postagemService.criarPostagem({
+      setSaving(true);
+      const novaPostagem = await postagemService.criarPostagem({
         usuarioId: user.id,
         grupoId: grupoId,
         titulo: novaTarefa,
         conteudo: novoConteudo,
       });
 
-      console.log('adicionarTarefa: aguardando resposta do serviço...');
-      const novaPostagem = await promise;
-      console.log('Resposta do servidor ao criar postagem:', novaPostagem);
-
       setPostagens([...postagens, novaPostagem]);
       setNovaTarefa("");
       setNovoConteudo("");
-      Alert.alert("Sucesso", "Tarefa criada com sucesso!");
+      setCriando(false);
+
+      if (Platform.OS === 'web') {
+        window.alert('Tarefa criada com sucesso!');
+      } else {
+        Alert.alert("Sucesso", "Tarefa criada com sucesso!");
+      }
     } catch (error) {
       console.error('Erro ao criar tarefa:', error);
       const message = error.response?.data?.message || error.message || 'Não foi possível criar a tarefa.';
-      Alert.alert('Erro ao criar tarefa', message);
+      if (Platform.OS === 'web') {
+        window.alert('Erro: ' + message);
+      } else {
+        Alert.alert('Erro ao criar tarefa', message);
+      }
     } finally {
-      if (timeoutId) clearTimeout(timeoutId);
-      setCriando(false);
-      console.log('adicionarTarefa: setCriando(false) chamado no finally');
+      setSaving(false);
     }
   }
 
@@ -226,16 +213,16 @@ export default function TarefasGrupoScreen() {
           <View style={{ flexDirection: "row", gap: 8 }}>
             <TouchableOpacity
               onPress={adicionarTarefa}
-              disabled={criando}
+              disabled={saving}
               style={{
                 flex: 1,
-                backgroundColor: criando ? "#5a9bf5" : "#007bff",
+                backgroundColor: saving ? "#5a9bf5" : "#007bff",
                 padding: 10,
                 borderRadius: 8,
                 alignItems: "center",
               }}
             >
-              {criando ? (
+              {saving ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={{ color: "#fff", fontWeight: "bold" }}>Adicionar</Text>
