@@ -46,7 +46,7 @@ const postagemService = {
     }
 
     try {
-      const response = await api.get('/postagem/listar');
+      const response = await api.get('/api/postagem/listar');
       return response.data;
     } catch (error) {
       console.error('Erro ao listar postagens:', error);
@@ -61,7 +61,7 @@ const postagemService = {
    */
   async buscarPorId(id) {
     try {
-      const response = await api.get(`/postagem/listarPorId/${id}`);
+      const response = await api.get(`/api/postagem/listarPorId/${id}`);
       return response.data;
     } catch (error) {
       console.error('Erro ao buscar postagem:', error);
@@ -76,7 +76,7 @@ const postagemService = {
    */
   async listarPorUsuario(usuarioId) {
     try {
-      const response = await api.get(`/postagem/listarPorUsuario/${usuarioId}`);
+      const response = await api.get(`/api/postagem/listarPorUsuario/${usuarioId}`);
       return response.data;
     } catch (error) {
       console.error('Erro ao listar postagens do usuário:', error);
@@ -101,7 +101,7 @@ const postagemService = {
     }
 
     try {
-      const response = await api.get(`/postagem/listarPorGrupo/${grupoId}`);
+      const response = await api.get(`/api/postagem/listarPorGrupo/${grupoId}`);
       return response.data;
     } catch (error) {
       console.error('Erro ao listar postagens do grupo:', error);
@@ -137,7 +137,7 @@ const postagemService = {
     }
 
     try {
-      const response = await api.post('/postagem/criar', {
+      const response = await api.post('/api/postagem/criar', {
         usuarioId: dados.usuarioId,
         grupoId: dados.grupoId,
         titulo: dados.titulo,
@@ -168,7 +168,7 @@ const postagemService = {
    */
   async atualizarPostagem(id, dados) {
     try {
-      const response = await api.put(`/postagem/atualizar/${id}`, {
+      const response = await api.put(`/api/postagem/atualizar/${id}`, {
         usuarioId: dados.usuarioId,
         grupoId: dados.grupoId,
         titulo: dados.titulo,
@@ -212,7 +212,7 @@ const postagemService = {
     }
 
     try {
-      await api.delete(`/postagem/apagar/${id}`);
+      await api.delete(`/api/postagem/apagar/${id}`);
       console.log('postagemService: deletou postagem no servidor id=', id);
     } catch (error) {
       console.error('Erro ao deletar postagem:', error);

@@ -50,7 +50,7 @@ const grupoService = {
     }
 
     try {
-      const response = await api.get('/grupo/listar');
+      const response = await api.get('/api/grupo/listar');
       return response.data;
     } catch (error) {
       console.error('Erro ao listar grupos:', error);
@@ -71,7 +71,7 @@ const grupoService = {
    */
   async buscarPorId(id) {
     try {
-      const response = await api.get(`/grupo/listarPorId/${id}`);
+      const response = await api.get(`/api/grupo/listarPorId/${id}`);
       return response.data;
     } catch (error) {
       console.error('Erro ao buscar grupo:', error);
@@ -104,7 +104,7 @@ const grupoService = {
     }
 
     try {
-      const response = await api.post('/grupo/criar', {
+      const response = await api.post('/api/grupo/criar', {
         nome: dados.nome,
         descricao: dados.descricao || '',
       });
@@ -130,7 +130,7 @@ const grupoService = {
    */
   async atualizarGrupo(id, dados) {
     try {
-      const response = await api.put(`/grupo/atualizar/${id}`, {
+      const response = await api.put(`/api/grupo/atualizar/${id}`, {
         nome: dados.nome,
         descricao: dados.descricao || '',
       });
@@ -162,7 +162,7 @@ const grupoService = {
     }
 
     try {
-      await api.delete(`/grupo/apagar/${id}`);
+      await api.delete(`/api/grupo/apagar/${id}`);
       console.log('grupoService: deletou grupo no servidor id=', id);
     } catch (error) {
       console.error('Erro ao deletar grupo:', error);
